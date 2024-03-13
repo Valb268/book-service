@@ -76,17 +76,22 @@ public class BookServiceImpl implements BookService {
 	}
 
 	@Override
-	@Transactional(readOnly = true)
-	public Iterable<BookDto> findBooksByAuthor(String author) {
-		return bookRepository.findBooksByAuthorsName(author)
+//	@Transactional(readOnly = true)
+	public Iterable<BookDto> findBooksByAuthor(String authorName) {
+		Author author = authorRepository.findById(authorName).orElseThrow(EntityNotFoundException::new);
+		return author.getBooks()
+				.stream()
 				.map(b -> modelMapper.map(b, BookDto.class)).toList();
 	}
 
 	@Override
-	@Transactional(readOnly = true)
-	public Iterable<BookDto> findBooksByPublisher(String publisher) {
-		return bookRepository.findBooksByPublisher(new Publisher(publisher))
-				.map(b -> modelMapper.map(b, BookDto.class)).toList();
+//	@Transactional(readOnly = true)
+	public Iterable<BookDto> findBooksByPublisher(String publisherName) {
+		Publisher publisher = publisherRepository.findById(publisherName).orElseThrow(EntityNotFoundException::new);
+		return publisher.getBooks()
+				.stream()
+				.map(b -> modelMapper.map(b, BookDto.class))
+				.toList();
 	}
 
 	@Override
@@ -100,9 +105,10 @@ public class BookServiceImpl implements BookService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public Iterable<String> findPublishersByAuthor(String author) {
-		return bookRepository.findBooksByAuthorsName(author)
-				.map(b -> b.getPublisher().toString()).distinct().toList();
+	public Iterable<String> findPublishersByAuthor(String authorName) {
+		return publisherRepository.findDistinctByBooksAuthorsName(authorName)
+				.map(Publisher::getPublisherName)
+				.toList();
 	}
 
 	@Override
@@ -111,9 +117,9 @@ public class BookServiceImpl implements BookService {
 		Author author = authorRepository.findById(authorName)
 				.orElseThrow(EntityNotFoundException::new);
 		AuthorDto authorDto = modelMapper.map(author, AuthorDto.class);
-		List<String> isbnToRemove = bookRepository
-				.findBooksByAuthorsName(authorName).map(b -> b.getIsbn()).toList();
-		isbnToRemove.forEach(bookRepository::deleteById);
+//		List<String> isbnToRemove = bookRepository
+//				.findBooksByAuthorsName(authorName).map(b -> b.getIsbn()).toList();
+//		isbnToRemove.forEach(bookRepository::deleteById);
 		authorRepository.deleteById(authorName);
 		return authorDto;
 	}
