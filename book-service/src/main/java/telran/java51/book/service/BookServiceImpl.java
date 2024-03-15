@@ -1,6 +1,5 @@
 package telran.java51.book.service;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,12 +35,12 @@ public class BookServiceImpl implements BookService {
 		}
 		Set<Author> authors = bookDto.getAuthors().stream()
 				.map(a -> authorRepository.findById(a.getName())
-						.orElse(authorRepository.save(
+						.orElseGet(() -> authorRepository.save(
 								new Author(a.getName(), a.getBirthDate()))))
 				.collect(Collectors.toSet());
 
 		Publisher publisher = publisherRepository
-				.findById(bookDto.getPublisher()).orElse(publisherRepository
+				.findById(bookDto.getPublisher()).orElseGet(() -> publisherRepository
 						.save(new Publisher(bookDto.getPublisher())));
 		Book book = new Book(bookDto.getIsbn(), bookDto.getTitle(), authors,
 				publisher);
