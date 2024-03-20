@@ -7,6 +7,8 @@ import org.springframework.stereotype.Repository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import telran.java51.book.dto.exceptions.EntityNotFoundException;
@@ -48,13 +50,18 @@ public class BookRepositoryImpl implements BookRepository {
 
 	@Override
 	public Optional<Book> findById(String isbn) {
-		return Optional.ofNullable(em.find(Book.class, isbn));
+		TypedQuery<Book> query = em.createQuery("select b from Book b join fetch b.authors a where b.isbn=?1", Book.class);
+		query.setParameter(1, isbn);
+		return Optional.of(query.getSingleResult());
 	}
 
 	@Override
 	public void deleteById(String isbn) {
-		Book book = findById(isbn).orElseThrow(EntityNotFoundException::new);
-		em.remove(book);
+//		Book book = findById(isbn).orElseThrow(EntityNotFoundException::new);
+//		em.remove(book);
+		Query query = em.createQuery("delete from Book b where b.isbn=?1");
+		query.setParameter(1, isbn);
+		query.executeUpdate();
 	}
 
 }
